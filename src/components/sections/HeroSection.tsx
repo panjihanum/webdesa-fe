@@ -1,0 +1,83 @@
+"use client";
+
+import { motion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { Container } from "@/components/layout/Container";
+import { siteConfig } from "@/constants/site";
+
+export const HeroSection = () => {
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-b from-green-50 to-white dark:from-green-950 dark:to-background py-20 md:py-32">
+      <Container>
+        <div className="grid md:grid-cols-2 gap-10 items-center">
+          {/* TEXT BLOCK */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight text-balance text-foreground mb-4">
+              Selamat Datang di{" "}
+              <span className="text-primary">{siteConfig.name}</span>
+            </h1>
+            <p className="text-muted-foreground text-lg md:text-xl mb-8 max-w-prose">
+              {siteConfig.description} Nikmati kemudahan akses informasi desa,
+              pelayanan publik, dan berita terbaru dari kami.
+            </p>
+
+            <div className="flex gap-4">
+              <Link
+                href="/profil"
+                className="px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition"
+              >
+                Tentang Desa
+              </Link>
+              <Link
+                href="/layanan"
+                className="px-6 py-3 rounded-lg border border-border text-foreground hover:bg-accent/20 transition"
+              >
+                Layanan Masyarakat
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* IMAGE BLOCK */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="relative flex justify-center"
+          >
+            <div className="relative w-[90%] md:w-[420px] aspect-square rounded-2xl overflow-hidden shadow-lg border border-border bg-card">
+              <Image
+                src="/images/hero-desa.jpg"
+                alt="Pemandangan Desa"
+                fill
+                className="object-cover"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+            </div>
+          </motion.div>
+        </div>
+      </Container>
+
+      {/* BACKGROUND ELEMENT */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.15 }}
+        transition={{ duration: 1.5 }}
+        className="absolute -bottom-16 -left-10 w-[300px] h-[300px] bg-green-300 rounded-full blur-3xl dark:bg-green-800"
+      />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.15 }}
+        transition={{ duration: 1.5 }}
+        className="absolute -top-10 -right-20 w-[300px] h-[300px] bg-green-400 rounded-full blur-3xl dark:bg-green-700"
+      />
+    </section>
+  );
+};
