@@ -1,15 +1,39 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
-import { servicesData } from "@/data/services";
+
+interface ServiceItem {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+  slug: string;
+}
 
 export default function LayananPage() {
+  const [services, setServices] = useState<ServiceItem[]>([]);
+
+  useEffect(() => {
+    async function fetchServices() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/services`);
+        if (res.ok) {
+          const json = await res.json();
+          setServices(json);
+        }
+      } catch (err) {
+        console.error("Failed to load services:", err);
+      }
+    }
+    fetchServices();
+  }, []);
+
   return (
     <main className="py-20 bg-background">
       <Container>
-        {/* HEADER */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -26,14 +50,13 @@ export default function LayananPage() {
           </p>
         </motion.div>
 
-        {/* GRID LAYANAN */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
           className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {servicesData.map((service) => (
+          {services.map((service) => (
             <Link
               key={service.id}
               href={`/layanan/${service.slug}`}

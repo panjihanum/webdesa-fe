@@ -1,23 +1,50 @@
 "use client";
 
-import { notFound } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, notFound } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Container } from "@/components/layout/Container";
-import { newsData } from "@/data/news";
 
-interface Props {
-  params: { slug: string };
+interface NewsItem {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  date: string;
+  excerpt: string;
+  content?: string;
 }
 
-export default function BeritaDetailPage({ params }: Props) {
-  const berita = newsData.find((b) => b.slug === params.slug);
-  if (!berita) return notFound();
+export default function BeritaDetailPage() {
+  const { slug } = useParams() as { slug: string };
+  const [berita, setBerita] = useState<NewsItem | null>(null);
+
+  useEffect(() => {
+    async function fetchBerita() {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/news/slug/${slug}`
+        );
+        if (res.ok) {
+          const json = await res.json();
+          setBerita(json);
+        } else {
+          notFound();
+        }
+      } catch (err) {
+        console.error("Failed to load news:", err);
+        notFound();
+      }
+    }
+    fetchBerita();
+  }, [slug]);
+
+  if (!berita) return null;
 
   return (
     <main className="py-20 bg-background">
       <Container>
-        {/* IMAGE */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -34,7 +61,6 @@ export default function BeritaDetailPage({ params }: Props) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
         </motion.div>
 
-        {/* CONTENT */}
         <motion.article
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -57,21 +83,12 @@ export default function BeritaDetailPage({ params }: Props) {
             {berita.excerpt}
           </p>
 
-          {/* Dummy content tambahan */}
-          <div className="space-y-4 text-muted-foreground leading-relaxed">
-            <p>
-              Kegiatan ini merupakan bagian dari komitmen pemerintah desa untuk
-              terus memperbaiki fasilitas umum dan meningkatkan kualitas hidup
-              warga. Semua elemen masyarakat ikut terlibat dalam pelaksanaan
-              kegiatan tersebut.
-            </p>
-            <p>
-              Diharapkan, dengan adanya kegiatan seperti ini, warga semakin
-              sadar pentingnya kebersamaan dan menjaga lingkungan sekitar.
-              Pemerintah desa juga berencana untuk menjadwalkan kegiatan serupa
-              secara rutin setiap bulannya.
-            </p>
-          </div>
+          {berita.content && (
+            <div
+              className="prose prose-lg dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: berita.content }}
+            />
+          )}
         </motion.article>
       </Container>
     </main>

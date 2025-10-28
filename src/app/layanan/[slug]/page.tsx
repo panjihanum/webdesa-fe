@@ -1,21 +1,47 @@
 "use client";
 
-import { notFound } from "next/navigation";
+import { useEffect, useState } from "react";
+import { notFound, useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
-import { servicesData } from "@/data/services";
 
-interface Props {
-  params: { slug: string };
+interface ServiceDetail {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+  slug: string;
 }
 
-export default function LayananDetailPage({ params }: Props) {
-  const layanan = servicesData.find((s) => s.slug === params.slug);
-  if (!layanan) return notFound();
+export default function LayananDetailPage() {
+  const { slug } = useParams() as { slug: string };
+
+  const [layanan, setLayanan] = useState<ServiceDetail | null>(null);
+
+  useEffect(() => {
+    async function fetchDetail() {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/services/slug/${slug}`
+        );
+        if (res.ok) {
+          const json = await res.json();
+          setLayanan(json);
+        } else {
+          setLayanan(null);
+        }
+      } catch {
+        setLayanan(null);
+      }
+    }
+    fetchDetail();
+  }, [slug]);
+
+  if (!layanan) return;
 
   return (
-    <main className="py-20 bg-background">
+    <main className="py-20 bg-backgroun">
       <Container>
         <motion.div
           initial={{ opacity: 0, y: 30 }}

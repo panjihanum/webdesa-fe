@@ -1,29 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Container } from "@/components/layout/Container";
-import { galleryData } from "@/data/gallery";
 import { X } from "lucide-react";
 
+interface GalleryItem {
+  id: number;
+  title: string;
+  image: string;
+  category: string;
+}
+
 export default function GaleriPage() {
+  const [data, setData] = useState<GalleryItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
+  useEffect(() => {
+    async function fetchGallery() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/gallery`);
+        if (res.ok) {
+          const json = await res.json();
+          setData(json);
+        }
+      } catch (err) {
+        console.error("Failed to load gallery:", err);
+      }
+    }
+    fetchGallery();
+  }, []);
+
   const categories = [
     "Semua",
-    ...Array.from(new Set(galleryData.map((g) => g.category))),
+    ...Array.from(new Set(data.map((g) => g.category))),
   ];
   const filteredData =
     selectedCategory === "Semua"
-      ? galleryData
-      : galleryData.filter((g) => g.category === selectedCategory);
+      ? data
+      : data.filter((g) => g.category === selectedCategory);
 
   return (
     <main className="py-20 bg-background">
       <Container>
-        {/* HEADER */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -39,7 +60,6 @@ export default function GaleriPage() {
           </p>
         </motion.div>
 
-        {/* FILTER */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           {categories.map((cat) => (
             <button
@@ -56,7 +76,6 @@ export default function GaleriPage() {
           ))}
         </div>
 
-        {/* GRID GALERI */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -86,7 +105,6 @@ export default function GaleriPage() {
           ))}
         </motion.div>
 
-        {/* MODAL PREVIEW */}
         <AnimatePresence>
           {previewImage && (
             <motion.div

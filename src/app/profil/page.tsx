@@ -1,15 +1,49 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Container } from "@/components/layout/Container";
-import { profileData } from "@/data/profile";
 import Image from "next/image";
 
+interface Perangkat {
+  id: number;
+  nama: string;
+  jabatan: string;
+}
+
+interface Profile {
+  id: number;
+  nama_desa: string;
+  kepala_desa: string;
+  sejarah: string;
+  visi: string;
+  misi: string[];
+  perangkat: Perangkat[];
+}
+
 export default function ProfilDesaPage() {
+  const [data, setData] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/profile`);
+        if (res.ok) {
+          const json = await res.json();
+          setData(json);
+        }
+      } catch (err) {
+        console.error("Failed to load profile:", err);
+      }
+    }
+    fetchProfile();
+  }, []);
+
+  if (!data) return null;
+
   return (
     <main className="py-20 bg-background">
       <Container>
-        {/* HEADER */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -17,19 +51,14 @@ export default function ProfilDesaPage() {
           className="text-center mb-12"
         >
           <h1 className="text-4xl font-bold text-foreground mb-3">
-            Profil Desa {profileData.namaDesa}
+            Profil Desa {data.nama_desa}
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Mengenal lebih dekat sejarah, visi, misi, dan perangkat pemerintahan
-            {` `}
-            <span className="text-primary font-medium">
-              {profileData.namaDesa}
-            </span>
-            .
+            Mengenal lebih dekat sejarah, visi, misi, dan perangkat pemerintahan{" "}
+            <span className="text-primary font-medium">{data.nama_desa}</span>.
           </p>
         </motion.div>
 
-        {/* SEJARAH DESA */}
         <motion.section
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -42,7 +71,7 @@ export default function ProfilDesaPage() {
               Sejarah Singkat
             </h2>
             <p className="text-muted-foreground leading-relaxed text-justify">
-              {profileData.sejarah}
+              {data.sejarah}
             </p>
           </div>
           <div className="relative w-full h-[300px] rounded-xl overflow-hidden border border-border shadow-sm">
@@ -55,7 +84,6 @@ export default function ProfilDesaPage() {
           </div>
         </motion.section>
 
-        {/* VISI & MISI */}
         <motion.section
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -69,13 +97,12 @@ export default function ProfilDesaPage() {
           <div className="bg-card border border-border rounded-xl p-6 space-y-6">
             <div>
               <h3 className="text-xl font-semibold mb-2 text-primary">Visi</h3>
-              <p className="italic text-muted-foreground">{profileData.visi}</p>
+              <p className="italic text-muted-foreground">{data.visi}</p>
             </div>
-
             <div>
               <h3 className="text-xl font-semibold mb-2 text-primary">Misi</h3>
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                {profileData.misi.map((item, i) => (
+                {data.misi.map((item, i) => (
                   <li key={i}>{item}</li>
                 ))}
               </ul>
@@ -83,7 +110,6 @@ export default function ProfilDesaPage() {
           </div>
         </motion.section>
 
-        {/* STRUKTUR PEMERINTAHAN */}
         <motion.section
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -94,11 +120,10 @@ export default function ProfilDesaPage() {
           <h2 className="text-2xl font-semibold mb-4 text-foreground">
             Struktur Pemerintahan Desa
           </h2>
-
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {profileData.perangkat.map((p, i) => (
+            {data.perangkat?.map((p) => (
               <div
-                key={i}
+                key={p.id}
                 className="bg-card border border-border rounded-xl p-5 text-center hover:shadow-md transition"
               >
                 <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-muted flex items-center justify-center text-2xl font-bold text-primary">
@@ -109,27 +134,6 @@ export default function ProfilDesaPage() {
               </div>
             ))}
           </div>
-        </motion.section>
-
-        {/* INFO TAMBAHAN */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <h2 className="text-2xl font-semibold mb-3 text-foreground">
-            Potensi & Demografi
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            {profileData.namaDesa} memiliki potensi unggulan di bidang{" "}
-            <span className="font-medium text-primary">pertanian</span>,
-            <span className="font-medium text-primary"> perikanan</span>, dan{" "}
-            <span className="font-medium text-primary">UMKM</span>. Dengan
-            populasi ±3.500 jiwa, masyarakat hidup rukun dan gotong royong dalam
-            membangun desa menuju kemandirian dan kesejahteraan bersama.
-          </p>
         </motion.section>
       </Container>
     </main>

@@ -1,17 +1,39 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
-import { siteConfig } from "@/constants/site";
 
 export const HeroSection = () => {
+  const [data, setData] = useState<{
+    is_show_hero: boolean;
+    hero_title: string;
+    hero_subtitle: string;
+  } | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/section-setting`
+        );
+        const json = await res.json();
+        setData(json);
+      } catch (e) {
+        console.error("Failed to load section setting:", e);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (!data?.is_show_hero) return null;
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-green-50 to-white dark:from-green-950 dark:to-background py-20 md:py-32">
       <Container>
         <div className="grid md:grid-cols-2 gap-10 items-center">
-          {/* TEXT BLOCK */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -19,12 +41,10 @@ export const HeroSection = () => {
             viewport={{ once: true }}
           >
             <h1 className="text-4xl md:text-5xl font-bold leading-tight text-balance text-foreground mb-4">
-              Selamat Datang di{" "}
-              <span className="text-primary">{siteConfig.name}</span>
+              {data.hero_title}
             </h1>
             <p className="text-muted-foreground text-lg md:text-xl mb-8 max-w-prose">
-              {siteConfig.description} Nikmati kemudahan akses informasi desa,
-              pelayanan publik, dan berita terbaru dari kami.
+              {data.hero_subtitle}
             </p>
 
             <div className="flex gap-4">
@@ -43,7 +63,6 @@ export const HeroSection = () => {
             </div>
           </motion.div>
 
-          {/* IMAGE BLOCK */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -65,7 +84,6 @@ export const HeroSection = () => {
         </div>
       </Container>
 
-      {/* BACKGROUND ELEMENT */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.15 }}

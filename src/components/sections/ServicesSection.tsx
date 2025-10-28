@@ -1,15 +1,41 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Container } from "@/components/layout/Container";
-import { servicesData } from "@/data/services";
+
+interface ServiceItem {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+  slug: string;
+}
 
 export const ServicesSection = () => {
+  const [services, setServices] = useState<ServiceItem[]>([]);
+
+  useEffect(() => {
+    async function fetchServices() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/services`);
+        if (res.ok) {
+          const json = await res.json();
+          setServices(json);
+        }
+      } catch (err) {
+        console.error("Failed to load services:", err);
+      }
+    }
+    fetchServices();
+  }, []);
+
+  if (!services.length) return null;
+
   return (
     <section className="py-20 bg-muted/20">
       <Container>
-        {/* HEADER */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -26,7 +52,6 @@ export const ServicesSection = () => {
           </p>
         </motion.div>
 
-        {/* SERVICES GRID */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -34,10 +59,10 @@ export const ServicesSection = () => {
           viewport={{ once: true }}
           className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
         >
-          {servicesData.map((service) => (
+          {services.map((service) => (
             <Link
               key={service.id}
-              href={service.slug}
+              href={"/layanan/" + service.slug}
               className="group bg-card border border-border rounded-xl p-6 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all"
             >
               <div>
@@ -56,7 +81,6 @@ export const ServicesSection = () => {
           ))}
         </motion.div>
 
-        {/* CTA */}
         <div className="text-center mt-12">
           <Link
             href="/layanan"

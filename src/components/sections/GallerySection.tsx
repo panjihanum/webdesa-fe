@@ -1,15 +1,40 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Container } from "@/components/layout/Container";
-import { galleryData } from "@/data/gallery";
+
+interface GalleryItem {
+  id: number;
+  title: string;
+  image: string;
+  category: string;
+}
 
 export const GallerySection = () => {
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+
+  useEffect(() => {
+    async function fetchGallery() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/gallery`);
+        if (res.ok) {
+          const json = await res.json();
+          setGallery(json);
+        }
+      } catch (err) {
+        console.error("Failed to load gallery:", err);
+      }
+    }
+    fetchGallery();
+  }, []);
+
+  if (!gallery.length) return null;
+
   return (
     <section className="py-20 bg-muted/30 dark:bg-muted/10">
       <Container>
-        {/* HEADER */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -26,7 +51,6 @@ export const GallerySection = () => {
           </p>
         </motion.div>
 
-        {/* GALLERY GRID */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -34,7 +58,7 @@ export const GallerySection = () => {
           viewport={{ once: true }}
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
         >
-          {galleryData.map((item) => (
+          {gallery.map((item) => (
             <div
               key={item.id}
               className="relative group rounded-xl overflow-hidden border border-border bg-card hover:shadow-lg transition"

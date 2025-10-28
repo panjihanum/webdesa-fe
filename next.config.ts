@@ -5,16 +5,29 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
+        protocol: "http",
+        hostname: "**",
+        pathname: "/**",
+      },
+      {
         protocol: "https",
         hostname: "**",
+        pathname: "/**",
       },
     ],
   },
   reactStrictMode: true,
-  swcMinify: true,
+  turbo: {
+    rules: {},
+    resolveAlias: {},
+    resolveExtensions: [],
+  },
   experimental: {
     optimizeCss: true,
     scrollRestoration: true,
+    turbo: {
+      resolveAlias: {},
+    },
   },
 };
 
